@@ -317,7 +317,7 @@ const concat = _.concat = function(arr1, arr2) {
     return arr2.reduce(function(arr, curr) {
         arr.push(curr);
         return arr;
-    }, a);
+    }, arr1);
 }
 
 
