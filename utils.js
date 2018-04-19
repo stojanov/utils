@@ -58,7 +58,7 @@
             if(!Array.isArray(curr) && typeof curr == 'object')
                 str = JSON.stringify(curr);
             else if(Array.isArray(curr))
-                str = '[' + arrToString(curr) + ']';
+                str = '[' + arrToString(curr, separator) + ']';
             else
                 str = curr;
 
