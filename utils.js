@@ -14,9 +14,6 @@
     } else {
         root._ = _;
     }
-    /**
-     * A very bare bones set of functional tools
-     */
 
 
     /**
@@ -84,24 +81,73 @@
     }
 
     /**
-     * Curry function used as helpers and as exports
-     * done the manual way
+     * Currying functions
      */
-    const curry2 = _.curry2 = function(fn) {
-        return function(arg1) {
-            return function(arg2) {
-                return fn(arg1, arg2);
+    
+    const makeCurry = _.makeCurry = function makeCurry(functor) {
+        return function curry(f) {
+            const arity = f.length;
+            let fArgs = [].slice.call(arguments, 1);
+    
+            const getArgs = function() {
+                let scopedArgs = fArgs;
+    
+                if(arguments.length > 0)
+                    scopedArgs = scopedArgs.concat([].slice.call(arguments));
+    
+                if(scopedArgs.length >= arity)
+                    return f.apply(this, functor(scopedArgs));
+                else
+                    return curry.apply(this, [f].concat(scopedArgs));
             }
+    
+            return fArgs.length >= arity ? getArgs() : getArgs;
+        }
+    }
+    
+    const makeCurryExplicit = _.makeCurryExplicit = function makeCurryExplicit(functor) {
+        return function curryExplicit(f, airty) {
+            let fArgs = [].slice.call(arguments, 2);
+    
+            const getArgs = function() {
+                let scopedArgs = fArgs;
+    
+                if(arguments.length > 0) 
+                    scopedArgs = scopedArgs.concat([].slice.call(arguments));
+    
+                if(scopedArgs.length >= airty)
+                    return f.apply(this, functor(scopedArgs));
+                else
+                    return curryExplicit.apply(this, [f, airty].concat(scopedArgs));
+            }
+    
+            return fArgs.length >= airty ? getArgs() : getArgs;
         }
     }
 
-    const curry2rev = _.curry2rev = function(fn) {
-        return function(arg2) {
-            return function(arg1) {
-                return fn(arg1, arg2);
-            }
+    const curry = _.curry = makeCurry(id);
+    const curryRev = _.curryRev = makeCurry(args => args.reverse());
+
+    const curryExplicit = _.curryExplicit = makeCurryExplicit(id);
+    const curryExplicitRev = _.curryExplicitRev = makeCurryExplicit(args => args.reverse());
+
+    const nCurry = _.nCurry = function nCurry(arity) {
+        return function(fn) {
+            return curryExplicit(fn, arity);
         }
     }
+
+    const nCurryRev = _.nCurryRev = function nCurryRev(arity) {
+        return function(fn) {
+            return curryExplicitRev(fn, arity);
+        }
+    }
+
+    const curry2 = _.curry2 = nCurry(2); 
+    const curry2rev = _.curry2rev = nCurryRev(2);
+
+    const curry3 = _.curry2 = nCurry(3); 
+    const curry3rev = _.curry2rev = nCurryRev(3);
 
     /**
      * Logical operations
@@ -317,11 +363,15 @@
         return null;
     }
 
+    const reverse = _.reverse = function(arr) {
+        return arr.reverse();
+    }
+
     const fillArr = _.fillArr = function(len, fn = id) {
-        const element = fn(len);
+        const element = fn(--len);
         return len === 0
             ? [element]
-            : fillArr(--len, fn).concat(element);
+            : fillArr(len, fn).concat(element);
     }
 
     const fillArrC = _.fillArrC = curry2(fillArr);
@@ -373,14 +423,8 @@
     const reduce = _.reduce = function(arr, fn, v) {
         return arr.reduce(fn, v);
     }
-
-    // TODO: Make this better
-    const reducec = _.reducec = function(arr) {
-        return function(fn, v) {
-            return reduce(arr, fn, v);
-        }
-    }
-
+    
+    const reduceC = _.reduceC = curry3(reduce);
 
     const removeFirst = _.removeFirst = function(arr) {
         return arr.shift();
@@ -392,7 +436,6 @@
         return marr;
     }
 
-    // TODO: Add support for objects
     const getFirstValue = _.getFirstValue = function(arr) {
         return arr[0];
     }
@@ -420,6 +463,10 @@
         return a;
     }
 
+    const rejectC = _.rejectC = curry2(reject);
+
+    const rejectCR = _.rejectCR = curry2rev(reject);
+
     /**
      * Arrays passed by reference get modified
      */
@@ -436,6 +483,9 @@
         }, arr1);
     }
 
+    const concatC = _.concatC = curry2(concat);
+
+    const concatCR = _.concatCR = curry2rev(concat);
 
     /**
      * Concats the arrays without modifying the original 
@@ -474,6 +524,10 @@
             return last;
         }, [[], []]);
     }
+
+    const partitionC = _.partitionC = curry2(partition);
+
+    const partitionCR = _.partitionCR = curry2rev(partition);
 
     /**
      * Strings
