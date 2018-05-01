@@ -292,7 +292,7 @@
     }
 
     const rpipe = _.rpipe = function() {
-        const funcs = Array.from(arguments).reverse;
+        const funcs = Array.from(arguments).reverse();
         return function(v) {
             return pipeCore(v, funcs);
         }
